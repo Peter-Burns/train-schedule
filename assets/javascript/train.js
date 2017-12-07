@@ -103,6 +103,9 @@ $('#logout').on('click', function () {
         $('#loginArea').show();
         $('#mainContent').hide();
         $('#userArea').hide();
+        database.ref().off('child_removed');
+        database.ref().off('child_changed');
+        database.ref().off('child_added');
         clearInterval(updateInterval);
     }).catch(function (error) {
         console.log(error);
