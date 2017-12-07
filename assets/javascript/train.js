@@ -53,7 +53,6 @@ $('body').on('click', '.removeBtn', function () {
 });
 $('#login').on('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
         var user = result.user;
         login(user);
     }).catch(function (error) {
