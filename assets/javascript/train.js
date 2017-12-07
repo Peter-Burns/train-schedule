@@ -10,11 +10,19 @@ firebase.initializeApp(config);
 var database = firebase.database();
 var provider = new firebase.auth.GoogleAuthProvider();
 var updateInterval;
-var user = firebase.auth().currentUser;
-console.log(user);
-if (user) {
-    login(user);
-}
+firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+        login(user);
+        var displayName = user.displayName;
+        var email = user.email;
+        var emailVerified = user.emailVerified;
+        var photoURL = user.photoURL;
+        var isAnonymous = user.isAnonymous;
+        var uid = user.uid;
+        var providerData = user.providerData;
+        console.log(displayName);
+    }
+});
 $('#newTrain').on('click', function (event) {
     event.preventDefault();
     var name = $('#name').val();
