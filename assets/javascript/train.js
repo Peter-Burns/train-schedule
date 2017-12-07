@@ -11,6 +11,7 @@ var database = firebase.database();
 var provider = new firebase.auth.GoogleAuthProvider();
 var updateInterval;
 var user = firebase.auth().currentUser;
+console.log(user);
 if (user) {
     login(user);
 }
