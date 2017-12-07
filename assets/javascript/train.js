@@ -78,6 +78,7 @@ $('#logout').on('click', function () {
         database.ref().off('child_removed');
         database.ref().off('child_changed');
         database.ref().off('child_added');
+        $('.trainRow').remove();
         clearInterval(updateInterval);
     }).catch(function (error) {
         console.log(error);
