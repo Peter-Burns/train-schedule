@@ -10,6 +10,10 @@ firebase.initializeApp(config);
 var database = firebase.database();
 var provider = new firebase.auth.GoogleAuthProvider();
 var updateInterval;
+var user = firebase.auth().currentUser;
+if (user) {
+    login(user);
+}
 $('#newTrain').on('click', function (event) {
     event.preventDefault();
     var name = $('#name').val();
@@ -49,22 +53,7 @@ $('body').on('click', '.removeBtn', function () {
 $('#login').on('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
         var user = result.user;
-        $('#userName').text(user.displayName);
-        $('#loginArea').hide();
-        $('#mainContent').show();
-        $('#userArea').show();
-        database.ref().on('child_removed', function (row) {
-            $(`[data-key = ${row.key}]`).remove();
-        });
-        database.ref().on('child_changed', function (snapshot) {
-            var newRow = updateRow(snapshot);
-            $(`[data-key = ${snapshot.key}]`).replaceWith(newRow);
-        });
-        database.ref().on('child_added', function (snapshot) {
-            var newRow = updateRow(snapshot);
-            $('#scheduleTable tbody').append(newRow);
-        });
-        updateInterval = setInterval(updateTable, 1000);
+        login(user);
     }).catch(function (error) {
         console.log(error);
     });
@@ -84,6 +73,24 @@ $('#logout').on('click', function () {
         console.log(error);
     });
 });
+function login(user) {
+    $('#userName').text(user.displayName);
+    $('#loginArea').hide();
+    $('#mainContent').show();
+    $('#userArea').show();
+    database.ref().on('child_removed', function (row) {
+        $(`[data-key = ${row.key}]`).remove();
+    });
+    database.ref().on('child_changed', function (snapshot) {
+        var newRow = updateRow(snapshot);
+        $(`[data-key = ${snapshot.key}]`).replaceWith(newRow);
+    });
+    database.ref().on('child_added', function (snapshot) {
+        var newRow = updateRow(snapshot);
+        $('#scheduleTable tbody').append(newRow);
+    });
+    updateInterval = setInterval(updateTable, 1000);
+}
 function updateTable() {
     var rows = $('.trainRow');
     for (var i = 0; i < rows.length; i++) {
