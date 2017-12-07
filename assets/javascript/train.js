@@ -7,8 +7,8 @@ var config = {
     messagingSenderId: "94439665067"
 };
 firebase.initializeApp(config);
-var database = firebase.database();
 var provider = new firebase.auth.GoogleAuthProvider();
+var updateInterval;
 $('#newTrain').on('click', function (event) {
     event.preventDefault();
     var name = $('#name').val();
@@ -28,14 +28,6 @@ $('#newTrain').on('click', function (event) {
     $('#fTrainTime').val('');
     $('#frequency').val('');
 });
-database.ref().on('child_changed', function (snapshot) {
-    var newRow = updateRow(snapshot);
-    $(`[data-key = ${snapshot.key}]`).replaceWith(newRow);
-});
-database.ref().on('child_added', function (snapshot) {
-    var newRow = updateRow(snapshot);
-    $('#scheduleTable tbody').append(newRow);
-});
 $('body').on('click', '.updateBtn', function () {
     var row = $(this).parent().parent();
     var key = row.attr('data-key');
@@ -53,10 +45,6 @@ $('body').on('click', '.removeBtn', function () {
     var keyRef = database.ref().child($(this).parent().parent().attr('data-key'));
     keyRef.remove();
 });
-database.ref().on('child_removed', function (row) {
-    $(`[data-key = ${row.key}]`).remove();
-});
-var updateInterval = setInterval(updateTable, 1000);
 function updateTable() {
     var rows = $('.trainRow');
     for (var i = 0; i < rows.length; i++) {
@@ -88,11 +76,23 @@ function updateRow(snapshot) {
 $('#login').on('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
         var user = result.user;
-        console.log(user);
-        $('#userName').text(user);
+        $('#userName').text(user.displayName);
         $('#loginArea').hide();
         $('#mainContent').show();
         $('#userArea').show();
+        var database = firebase.database();
+        database.ref().on('child_removed', function (row) {
+            $(`[data-key = ${row.key}]`).remove();
+        });
+        database.ref().on('child_changed', function (snapshot) {
+            var newRow = updateRow(snapshot);
+            $(`[data-key = ${snapshot.key}]`).replaceWith(newRow);
+        });
+        database.ref().on('child_added', function (snapshot) {
+            var newRow = updateRow(snapshot);
+            $('#scheduleTable tbody').append(newRow);
+        });
+        updateInterval = setInterval(updateTable, 1000);
     }).catch(function (error) {
         console.log(error);
     });
@@ -103,6 +103,7 @@ $('#logout').on('click', function () {
         $('#loginArea').show();
         $('#mainContent').hide();
         $('#userArea').hide();
+        clearInterval(updateInterval);
     }).catch(function (error) {
         console.log(error);
     });
