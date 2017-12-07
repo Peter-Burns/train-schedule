@@ -22,36 +22,35 @@ $('#newTrain').on('click', function (event) {
         dateAdded: firebase.database.ServerValue.TIMESTAMP,
     };
     database.ref().push(newTrain);
-    alert('New Train Successfully added!');
     $('#name').val('');
     $('#destination').val('');
     $('#fTrainTime').val('');
     $('#frequency').val('');
 });
-database.ref().on('child_added', function (snapshot) {
+database.ref().on('child_changed', function (snapshot) {
+    var newRow = updateRow(snapshot);
+    $(`[data-key = ${snapshot.key}]`).replaceWith(newRow);
+});
+function updateRow(snapshot) {
     var key = snapshot.key;
     var train = snapshot.val();
-    var name = train.name;
-    var destination = train.destination;
-    var frequency = train.frequency;
-    var fTrainTime = train.fTrainTime;
     var newRow = $('<tr class="trainRow"></tr>');
-    newRow.attr('data-key',key);
-    newRow.attr('data-fTrainTime',fTrainTime);
-    newRow.append($('<td contenteditable="true">' + name + '</td>'));
-    newRow.append($('<td contenteditable="true">' + destination + '</td>'));
-    newRow.append($('<td contenteditable="true">' + frequency + '</td>'));
-    var firstTime = moment(fTrainTime, "HH:mm").subtract(1, "years");
-    var diffTime = moment().diff(firstTime, "minutes");
-    var minutesAway = frequency - (diffTime % frequency);
-    var nextArrival = moment(moment().add(minutesAway,'minutes')).format("HH:mm");
-    newRow.append('<td>' + nextArrival + '</td>');
-    newRow.append($('<td>' + minutesAway + '</td>'));
+    newRow.attr('data-key', key);
+    newRow.attr('data-fTrainTime', train.fTrainTime);
+    newRow.append($('<td contenteditable="true">' + train.name + '</td>'));
+    newRow.append($('<td contenteditable="true">' + train.destination + '</td>'));
+    newRow.append($('<td contenteditable="true">' + train.frequency + '</td>'));
+    newRow.append($('<td>'));
+    newRow.append($('<td>'));
     newRow.append($('<td><button class="btn btn-sm btn-success updateBtn">Update</button></td>'));
     newRow.append($('<td><button class="btn btn-sm btn-danger removeBtn">Remove</button></td>'));
+    return newRow;
+}
+database.ref().on('child_added', function (snapshot) {
+    var newRow = updateRow(snapshot);
     $('#scheduleTable tbody').append(newRow);
 });
-$('body').on('click','.updateBtn',function(){
+$('body').on('click', '.updateBtn', function () {
     var row = $(this).parent().parent();
     var key = row.attr('data-key');
     var name = row.children(':nth-child(1)').text();
@@ -59,34 +58,28 @@ $('body').on('click','.updateBtn',function(){
     var frequency = row.children(':nth-child(3)').text();
     var keyRef = database.ref().child(key);
     keyRef.update({
-        name : name,
-        destination : destination,
-        frequency : frequency,
+        name: name,
+        destination: destination,
+        frequency: frequency,
     });
-    var fTrainTime = row.attr('data-fTrainTime');
-    var firstTime = moment(fTrainTime, "HH:mm").subtract(1, "years");
-    var diffTime = moment().diff(firstTime, "minutes");
-    var minutesAway = frequency - (diffTime % frequency);
-    var nextArrival = moment(moment().add(minutesAway,'minutes')).format("HH:mm");
-    row.children(':nth-child(4)').text(nextArrival);
-    row.children(':nth-child(5)').text(minutesAway);
 });
-$('body').on('click','.removeBtn',function(){
-    var row = $(this).parent().parent();
-    var keyRef = database.ref().child(row.attr('data-key'));
+$('body').on('click', '.removeBtn', function () {
+    var keyRef = database.ref().child($(this).parent().parent().attr('data-key'));
     keyRef.remove();
-    row.remove();
 });
-var updateInterval = setInterval(updateTable,1000);
-function updateTable () {
+database.ref().on('child_removed', function (row) {
+    $(`[data-key = ${row.key}]`).remove();
+});
+var updateInterval = setInterval(updateTable, 1000);
+function updateTable() {
     var rows = $('.trainRow');
-    for(var i = 0; i<rows.length;i++){
+    for (var i = 0; i < rows.length; i++) {
         var fTrainTime = $(rows[i]).attr('data-fTrainTime');
         var frequency = $(rows[i]).children(':nth-child(3)').text();
         var firstTime = moment(fTrainTime, "HH:mm").subtract(1, "years");
         var diffTime = moment().diff(firstTime, "minutes");
         var minutesAway = frequency - (diffTime % frequency);
-        var nextArrival = moment(moment().add(minutesAway,'minutes')).format("HH:mm");
+        var nextArrival = moment(moment().add(minutesAway, 'minutes')).format("HH:mm");
         $(rows[i]).children(':nth-child(4)').text(nextArrival);
         $(rows[i]).children(':nth-child(5)').text(minutesAway);
     }
