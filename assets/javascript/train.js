@@ -13,14 +13,6 @@ var updateInterval;
 firebase.auth().onAuthStateChanged(function (user) {
     if (user) {
         login(user);
-        var displayName = user.displayName;
-        var email = user.email;
-        var emailVerified = user.emailVerified;
-        var photoURL = user.photoURL;
-        var isAnonymous = user.isAnonymous;
-        var uid = user.uid;
-        var providerData = user.providerData;
-        console.log(displayName);
     }
 });
 $('#newTrain').on('click', function (event) {
@@ -61,8 +53,6 @@ $('body').on('click', '.removeBtn', function () {
 });
 $('#login').on('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
-        var user = result.user;
-        login(user);
     }).catch(function (error) {
         console.log(error);
     });
