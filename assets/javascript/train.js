@@ -7,6 +7,7 @@ var config = {
     messagingSenderId: "94439665067"
 };
 firebase.initializeApp(config);
+var database = firebase.database();
 var provider = new firebase.auth.GoogleAuthProvider();
 var updateInterval;
 $('#newTrain').on('click', function (event) {
@@ -80,7 +81,6 @@ $('#login').on('click', function () {
         $('#loginArea').hide();
         $('#mainContent').show();
         $('#userArea').show();
-        var database = firebase.database();
         database.ref().on('child_removed', function (row) {
             $(`[data-key = ${row.key}]`).remove();
         });
