@@ -88,6 +88,7 @@ function updateRow(snapshot) {
 $('#login').on('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
         var user = result.user;
+        console.log(user);
         $('#userName').text(user);
         $('#loginArea').hide();
         $('#mainContent').show();
