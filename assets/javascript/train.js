@@ -46,34 +46,6 @@ $('body').on('click', '.removeBtn', function () {
     var keyRef = database.ref().child($(this).parent().parent().attr('data-key'));
     keyRef.remove();
 });
-function updateTable() {
-    var rows = $('.trainRow');
-    for (var i = 0; i < rows.length; i++) {
-        var fTrainTime = $(rows[i]).attr('data-fTrainTime');
-        var frequency = $(rows[i]).children(':nth-child(3)').text();
-        var firstTime = moment(fTrainTime, "HH:mm").subtract(1, "years");
-        var diffTime = moment().diff(firstTime, "minutes");
-        var minutesAway = frequency - (diffTime % frequency);
-        var nextArrival = moment(moment().add(minutesAway, 'minutes')).format("HH:mm");
-        $(rows[i]).children(':nth-child(4)').text(nextArrival);
-        $(rows[i]).children(':nth-child(5)').text(minutesAway);
-    }
-}
-function updateRow(snapshot) {
-    var key = snapshot.key;
-    var train = snapshot.val();
-    var newRow = $('<tr class="trainRow"></tr>');
-    newRow.attr('data-key', key);
-    newRow.attr('data-fTrainTime', train.fTrainTime);
-    newRow.append($('<td contenteditable="true">' + train.name + '</td>'));
-    newRow.append($('<td contenteditable="true">' + train.destination + '</td>'));
-    newRow.append($('<td contenteditable="true">' + train.frequency + '</td>'));
-    newRow.append($('<td>'));
-    newRow.append($('<td>'));
-    newRow.append($('<td><button class="btn btn-sm btn-success updateBtn">Update</button></td>'));
-    newRow.append($('<td><button class="btn btn-sm btn-danger removeBtn">Remove</button></td>'));
-    return newRow;
-}
 $('#login').on('click', function () {
     firebase.auth().signInWithPopup(provider).then(function (result) {
         var user = result.user;
@@ -111,3 +83,31 @@ $('#logout').on('click', function () {
         console.log(error);
     });
 });
+function updateTable() {
+    var rows = $('.trainRow');
+    for (var i = 0; i < rows.length; i++) {
+        var fTrainTime = $(rows[i]).attr('data-fTrainTime');
+        var frequency = $(rows[i]).children(':nth-child(3)').text();
+        var firstTime = moment(fTrainTime, "HH:mm").subtract(1, "years");
+        var diffTime = moment().diff(firstTime, "minutes");
+        var minutesAway = frequency - (diffTime % frequency);
+        var nextArrival = moment(moment().add(minutesAway, 'minutes')).format("HH:mm");
+        $(rows[i]).children(':nth-child(4)').text(nextArrival);
+        $(rows[i]).children(':nth-child(5)').text(minutesAway);
+    }
+}
+function updateRow(snapshot) {
+    var key = snapshot.key;
+    var train = snapshot.val();
+    var newRow = $('<tr class="trainRow"></tr>');
+    newRow.attr('data-key', key);
+    newRow.attr('data-fTrainTime', train.fTrainTime);
+    newRow.append($('<td contenteditable="true">' + train.name + '</td>'));
+    newRow.append($('<td contenteditable="true">' + train.destination + '</td>'));
+    newRow.append($('<td contenteditable="true">' + train.frequency + '</td>'));
+    newRow.append($('<td>'));
+    newRow.append($('<td>'));
+    newRow.append($('<td><button class="btn btn-sm btn-success updateBtn">Update</button></td>'));
+    newRow.append($('<td><button class="btn btn-sm btn-danger removeBtn">Remove</button></td>'));
+    return newRow;
+}
