@@ -57,7 +57,21 @@ $('#login').on('click', function () {
         console.log(error);
     });
 });
-$('#logout').on('click', logout());
+$('#logout').on('click', function () {
+    firebase.auth().signOut().then(function () {
+        $('#userName').text('');
+        $('#loginArea').show();
+        $('#mainContent').hide();
+        $('#userArea').hide();
+        database.ref().off('child_removed');
+        database.ref().off('child_changed');
+        database.ref().off('child_added');
+        $('.trainRow').remove();
+        clearInterval(updateInterval);
+    }).catch(function (error) {
+        console.log(error);
+    });
+});
 function login(user) {
     $('#userName').text(user.displayName);
     $('#loginArea').hide();
@@ -75,21 +89,6 @@ function login(user) {
         $('#scheduleTable tbody').append(newRow);
     });
     updateInterval = setInterval(updateTable, 1000);
-}
-function logout() {
-    firebase.auth().signOut().then(function () {
-        $('#userName').text('');
-        $('#loginArea').show();
-        $('#mainContent').hide();
-        $('#userArea').hide();
-        database.ref().off('child_removed');
-        database.ref().off('child_changed');
-        database.ref().off('child_added');
-        $('.trainRow').remove();
-        clearInterval(updateInterval);
-    }).catch(function (error) {
-        console.log(error);
-    });
 }
 function updateTable() {
     var rows = $('.trainRow');
