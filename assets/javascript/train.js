@@ -8,6 +8,7 @@ var config = {
 };
 firebase.initializeApp(config);
 var database = firebase.database();
+var provider = new firebase.auth.GoogleAuthProvider();
 $('#newTrain').on('click', function (event) {
     event.preventDefault();
     var name = $('#name').val();
@@ -31,21 +32,6 @@ database.ref().on('child_changed', function (snapshot) {
     var newRow = updateRow(snapshot);
     $(`[data-key = ${snapshot.key}]`).replaceWith(newRow);
 });
-function updateRow(snapshot) {
-    var key = snapshot.key;
-    var train = snapshot.val();
-    var newRow = $('<tr class="trainRow"></tr>');
-    newRow.attr('data-key', key);
-    newRow.attr('data-fTrainTime', train.fTrainTime);
-    newRow.append($('<td contenteditable="true">' + train.name + '</td>'));
-    newRow.append($('<td contenteditable="true">' + train.destination + '</td>'));
-    newRow.append($('<td contenteditable="true">' + train.frequency + '</td>'));
-    newRow.append($('<td>'));
-    newRow.append($('<td>'));
-    newRow.append($('<td><button class="btn btn-sm btn-success updateBtn">Update</button></td>'));
-    newRow.append($('<td><button class="btn btn-sm btn-danger removeBtn">Remove</button></td>'));
-    return newRow;
-}
 database.ref().on('child_added', function (snapshot) {
     var newRow = updateRow(snapshot);
     $('#scheduleTable tbody').append(newRow);
@@ -84,3 +70,39 @@ function updateTable() {
         $(rows[i]).children(':nth-child(5)').text(minutesAway);
     }
 }
+function updateRow(snapshot) {
+    var key = snapshot.key;
+    var train = snapshot.val();
+    var newRow = $('<tr class="trainRow"></tr>');
+    newRow.attr('data-key', key);
+    newRow.attr('data-fTrainTime', train.fTrainTime);
+    newRow.append($('<td contenteditable="true">' + train.name + '</td>'));
+    newRow.append($('<td contenteditable="true">' + train.destination + '</td>'));
+    newRow.append($('<td contenteditable="true">' + train.frequency + '</td>'));
+    newRow.append($('<td>'));
+    newRow.append($('<td>'));
+    newRow.append($('<td><button class="btn btn-sm btn-success updateBtn">Update</button></td>'));
+    newRow.append($('<td><button class="btn btn-sm btn-danger removeBtn">Remove</button></td>'));
+    return newRow;
+}
+$('#login').on('click', function () {
+    firebase.auth().signInWithPopup(provider).then(function (result) {
+        var user = result.user;
+        $('#userName').text(user);
+        $('#loginArea').hide();
+        $('#mainContent').show();
+        $('#userArea').show();
+    }).catch(function (error) {
+        console.log(error);
+    });
+});
+$('#logout').on('click', function () {
+    firebase.auth().signOut().then(function () {
+        $('#userName').text('');
+        $('#loginArea').show();
+        $('#mainContent').hide();
+        $('#userArea').hide();
+    }).catch(function (error) {
+        console.log(error);
+    });
+});
